@@ -1,0 +1,51 @@
+{
+    "name": "rssd-drizzle",
+    "version": "0.0.2",
+    "description": "RSSD Drizzle Schema",
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs"
+        },
+        "./models": {
+            "types": "./dist/models.d.ts",
+            "import": "./dist/models.js",
+            "require": "./dist/models.cjs"
+        },
+        "./views": {
+            "types": "./dist/views.d.ts",
+            "import": "./dist/views.js",
+            "require": "./dist/views.cjs"
+        }
+    },
+    "files": [
+        "dist",
+        "README.md"
+    ],
+    "scripts": {
+        "build": "tsup models.ts views.ts index.ts --format cjs,esm --dts --clean",
+        "dev": "tsup models.ts views.ts index.ts --format cjs,esm --dts --watch",
+        "lint": "tsc --noEmit"
+    },
+    "keywords": [
+        "drizzle",
+        "orm",
+        "rssd",
+        "sqlite"
+    ],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "drizzle-orm": "^0.45.1",
+        "tsup": "^8.2.4",
+        "typescript": "^5.5.4"
+    },
+    "peerDependencies": {
+        "drizzle-orm": "^0.45.1"
+    }
+}
