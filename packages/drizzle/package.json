@@ -1,6 +1,6 @@
 {
-    "name": "rssd-drizzle",
-    "version": "0.0.2",
+    "name": "@surveilr/bootstrap-sql",
+    "version": "0.0.3",
     "description": "RSSD Drizzle Schema",
     "type": "module",
     "main": "./dist/index.cjs",
