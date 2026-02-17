@@ -18,31 +18,31 @@ import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
 
 // Custom types to match legacy SQL types
-const timestamptz = customType<{ data: string; driverData: string }>({ 
+const timestamptz = customType<{ data: string; driverData: string }>({
   dataType() { return 'TIMESTAMPTZ'; },
   fromDriver(value: string) { return value; },
   toDriver(value: string) { return value; }
 });
 
-const date = customType<{ data: string; driverData: string }>({ 
+const date = customType<{ data: string; driverData: string }>({
   dataType() { return 'DATE'; },
   fromDriver(value: string) { return value; },
   toDriver(value: string) { return value; }
 });
 
-const ulid = customType<{ data: string; driverData: string }>({ 
+const ulid = customType<{ data: string; driverData: string }>({
   dataType() { return 'ULID'; },
   fromDriver(value: string) { return value; },
   toDriver(value: string) { return value; }
 });
 
-const varchar = customType<{ data: string; driverData: string }>({ 
+const varchar = customType<{ data: string; driverData: string }>({
   dataType() { return 'VARCHAR'; },
   fromDriver(value: string) { return value; },
   toDriver(value: string) { return value; }
 });
 
-const textArray = customType<{ data: string[]; driverData: string }>({ 
+const textArray = customType<{ data: string[]; driverData: string }>({
   dataType() { return 'TEXT[]'; },
   fromDriver(value: string) { return JSON.parse(value); },
   toDriver(value: string[]) { return JSON.stringify(value); }
@@ -82,12 +82,6 @@ export const assuranceSchema = table("assurance_schema", {
   checkJSON(table.governance),
 ]);
 
-export const assuranceSchemaRelations = relations(
-  assuranceSchema,
-  ({ many }) => ({
-    behaviors: many(behavior),
-  }),
-);
 
 export const device = table("device", {
   deviceId: varchar("device_id").primaryKey().notNull(),
@@ -107,14 +101,6 @@ export const device = table("device", {
   checkJSON(table.elaboration),
 ]);
 
-export const deviceRelations = relations(device, ({ many }) => ({
-  devicePartyRelationships: many(devicePartyRelationship),
-  behaviors: many(behavior),
-  urIngestSessions: many(urIngestSession),
-  uniformResources: many(uniformResource),
-  orchestrationSessions: many(orchestrationSession),
-  surveilrOsqueryMsNodes: many(surveilrOsqueryMsNode),
-}));
 
 export const codeNotebookKernel = table("code_notebook_kernel", {
   codeNotebookKernelId: varchar("code_notebook_kernel_id").primaryKey().notNull(),
@@ -131,12 +117,6 @@ export const codeNotebookKernel = table("code_notebook_kernel", {
   checkJSON(table.governance),
 ]);
 
-export const codeNotebookKernelRelations = relations(
-  codeNotebookKernel,
-  ({ many }) => ({
-    codeNotebookCells: many(codeNotebookCell),
-  }),
-);
 
 export const codeNotebookCell = table("code_notebook_cell", {
   codeNotebookCellId: varchar("code_notebook_cell_id").primaryKey().notNull(),
@@ -157,16 +137,6 @@ export const codeNotebookCell = table("code_notebook_cell", {
   checkJSON(table.arguments),
 ]);
 
-export const codeNotebookCellRelations = relations(
-  codeNotebookCell,
-  ({ one, many }) => ({
-    codeNotebookKernel: one(codeNotebookKernel, {
-      fields: [codeNotebookCell.notebookKernelId],
-      references: [codeNotebookKernel.codeNotebookKernelId],
-    }),
-    codeNotebookStates: many(codeNotebookState),
-  }),
-);
 
 export const codeNotebookState = table("code_notebook_state", {
   codeNotebookStateId: varchar("code_notebook_state_id").primaryKey().notNull(),
@@ -186,15 +156,6 @@ export const codeNotebookState = table("code_notebook_state", {
   checkJSON(table.elaboration),
 ]);
 
-export const codeNotebookStateRelations = relations(
-  codeNotebookState,
-  ({ one }) => ({
-    codeNotebookCell: one(codeNotebookCell, {
-      fields: [codeNotebookState.codeNotebookCellId],
-      references: [codeNotebookCell.codeNotebookCellId],
-    }),
-  }),
-);
 
 export const sqlpageFiles = table("sqlpage_files", {
   path: text().primaryKey().notNull(),
@@ -231,9 +192,6 @@ export const partyType = table("party_type", {
   unique("unq_party_type_code").on(table.code)
 ]);
 
-export const partyTypeRelations = relations(partyType, ({ many }) => ({
-  parties: many(party),
-}));
 
 export const party = table("party", {
   partyId: varchar("party_id").primaryKey().notNull(),
@@ -250,27 +208,6 @@ export const party = table("party", {
   ),
 ]);
 
-export const partyRelations = relations(party, ({ one, many }) => ({
-  partyType: one(partyType, {
-    fields: [party.partyTypeId],
-    references: [partyType.partyTypeId],
-  }),
-  partyRelations_relatedPartyId: many(partyRelation, {
-    relationName: "partyRelation_relatedPartyId_party_partyId",
-  }),
-  partyRelations_partyId: many(partyRelation, {
-    relationName: "partyRelation_partyId_party_partyId",
-  }),
-  people: many(person),
-  organizations: many(organization),
-  organizationRoles_organizationId: many(organizationRole, {
-    relationName: "organizationRole_organizationId_party_partyId",
-  }),
-  organizationRoles_personId: many(organizationRole, {
-    relationName: "organizationRole_personId_party_partyId",
-  }),
-  devicePartyRelationships: many(devicePartyRelationship),
-}));
 
 export const partyRelationType = table("party_relation_type", {
   partyRelationTypeId: text("party_relation_type_id").primaryKey().notNull().$type<string>(), // ULID
@@ -281,12 +218,6 @@ export const partyRelationType = table("party_relation_type", {
   unique().on(table.code),
 ]);
 
-export const partyRelationTypeRelations = relations(
-  partyRelationType,
-  ({ many }) => ({
-    partyRelations: many(partyRelation),
-  }),
-);
 
 export const partyRelation = table("party_relation", {
   partyRelationId: varchar("party_relation_id").primaryKey().notNull(),
@@ -309,22 +240,6 @@ export const partyRelation = table("party_relation", {
   checkJSON(table.elaboration),
 ]);
 
-export const partyRelationRelations = relations(partyRelation, ({ one }) => ({
-  partyRelationType: one(partyRelationType, {
-    fields: [partyRelation.relationTypeId],
-    references: [partyRelationType.partyRelationTypeId],
-  }),
-  party_relatedPartyId: one(party, {
-    fields: [partyRelation.relatedPartyId],
-    references: [party.partyId],
-    relationName: "partyRelation_relatedPartyId_party_partyId",
-  }),
-  party_partyId: one(party, {
-    fields: [partyRelation.partyId],
-    references: [party.partyId],
-    relationName: "partyRelation_partyId_party_partyId",
-  }),
-}));
 
 export const genderType = table("gender_type", {
   genderTypeId: ulid("gender_type_id").primaryKey().notNull(),
@@ -335,9 +250,6 @@ export const genderType = table("gender_type", {
   unique().on(table.code),
 ]);
 
-export const genderTypeRelations = relations(genderType, ({ many }) => ({
-  people: many(person),
-}));
 
 export const sexType = table("sex_type", {
   sexTypeId: ulid("sex_type_id").primaryKey().notNull(),
@@ -348,9 +260,6 @@ export const sexType = table("sex_type", {
   unique().on(table.code),
 ]);
 
-export const sexTypeRelations = relations(sexType, ({ many }) => ({
-  people: many(person),
-}));
 
 export const personType = table("person_type", {
   personTypeId: ulid("person_type_id").primaryKey().notNull(),
@@ -361,9 +270,6 @@ export const personType = table("person_type", {
   unique().on(table.code),
 ]);
 
-export const personTypeRelations = relations(personType, ({ many }) => ({
-  people: many(person),
-}));
 
 export const person = table("person", {
   personId: ulid("person_id").primaryKey().notNull(),
@@ -387,24 +293,6 @@ export const person = table("person", {
   checkJSON(table.elaboration),
 ]);
 
-export const personRelations = relations(person, ({ one }) => ({
-  sexType: one(sexType, {
-    fields: [person.sexId],
-    references: [sexType.sexTypeId],
-  }),
-  genderType: one(genderType, {
-    fields: [person.genderId],
-    references: [genderType.genderTypeId],
-  }),
-  personType: one(personType, {
-    fields: [person.personTypeId],
-    references: [personType.personTypeId],
-  }),
-  party: one(party, {
-    fields: [person.partyId],
-    references: [party.partyId],
-  }),
-}));
 
 export const organization = table("organization", {
   organizationId: ulid("organization_id").primaryKey().notNull(),
@@ -421,12 +309,6 @@ export const organization = table("organization", {
   checkJSON(table.elaboration),
 ]);
 
-export const organizationRelations = relations(organization, ({ one }) => ({
-  party: one(party, {
-    fields: [organization.partyId],
-    references: [party.partyId],
-  }),
-}));
 
 export const organizationRoleType = table("organization_role_type", {
   organizationRoleTypeId: ulid("organization_role_type_id").primaryKey()
@@ -438,12 +320,6 @@ export const organizationRoleType = table("organization_role_type", {
   unique().on(table.code),
 ]);
 
-export const organizationRoleTypeRelations = relations(
-  organizationRoleType,
-  ({ many }) => ({
-    organizationRoles: many(organizationRole),
-  }),
-);
 
 export const organizationRole = table("organization_role", {
   organizationRoleId: text("organization_role_id").primaryKey().notNull(),
@@ -463,25 +339,6 @@ export const organizationRole = table("organization_role", {
   checkJSON(table.elaboration),
 ]);
 
-export const organizationRoleRelations = relations(
-  organizationRole,
-  ({ one }) => ({
-    organizationRoleType: one(organizationRoleType, {
-      fields: [organizationRole.organizationRoleTypeId],
-      references: [organizationRoleType.organizationRoleTypeId],
-    }),
-    party_organizationId: one(party, {
-      fields: [organizationRole.organizationId],
-      references: [party.partyId],
-      relationName: "organizationRole_organizationId_party_partyId",
-    }),
-    party_personId: one(party, {
-      fields: [organizationRole.personId],
-      references: [party.partyId],
-      relationName: "organizationRole_personId_party_partyId",
-    }),
-  }),
-);
 
 export const devicePartyRelationship = table("device_party_relationship", {
   devicePartyRelationshipId: text("device_party_relationship_id").primaryKey()
@@ -499,19 +356,6 @@ export const devicePartyRelationship = table("device_party_relationship", {
   checkJSON(table.elaboration),
 ]);
 
-export const devicePartyRelationshipRelations = relations(
-  devicePartyRelationship,
-  ({ one }) => ({
-    party: one(party, {
-      fields: [devicePartyRelationship.partyId],
-      references: [party.partyId],
-    }),
-    device: one(device, {
-      fields: [devicePartyRelationship.deviceId],
-      references: [device.deviceId],
-    }),
-  }),
-);
 
 export const behavior = table("behavior", {
   behaviorId: varchar("behavior_id").primaryKey().notNull(),
@@ -527,18 +371,6 @@ export const behavior = table("behavior", {
   checkJSON(table.governance),
 ]);
 
-export const behaviorRelations = relations(behavior, ({ one, many }) => ({
-  assuranceSchema: one(assuranceSchema, {
-    fields: [behavior.assuranceSchemaId],
-    references: [assuranceSchema.assuranceSchemaId],
-  }),
-  device: one(device, {
-    fields: [behavior.deviceId],
-    references: [device.deviceId],
-  }),
-  urIngestSessions: many(urIngestSession),
-  surveilrOsqueryMsNodes: many(surveilrOsqueryMsNode),
-}));
 
 export const urIngestResourcePathMatchRule = table(
   "ur_ingest_resource_path_match_rule",
@@ -600,29 +432,6 @@ export const urIngestSession = table("ur_ingest_session", {
   checkJSON(table.elaboration),
 ]);
 
-export const urIngestSessionRelations = relations(
-  urIngestSession,
-  ({ one, many }) => ({
-    behavior: one(behavior, {
-      fields: [urIngestSession.behaviorId],
-      references: [behavior.behaviorId],
-    }),
-    device: one(device, {
-      fields: [urIngestSession.deviceId],
-      references: [device.deviceId],
-    }),
-    urIngestSessionFsPaths: many(urIngestSessionFsPath),
-    uniformResources: many(uniformResource),
-    urIngestSessionFsPathEntries: many(urIngestSessionFsPathEntry),
-    urIngestSessionTasks: many(urIngestSessionTask),
-    urIngestSessionImapAccounts: many(urIngestSessionImapAccount),
-    urIngestSessionImapAcctFolders: many(urIngestSessionImapAcctFolder),
-    urIngestSessionImapAcctFolderMessages: many(
-      urIngestSessionImapAcctFolderMessage,
-    ),
-    urIngestSessionUdiPgpSqls: many(urIngestSessionUdiPgpSql),
-  }),
-);
 
 export const urIngestSessionFsPath = table("ur_ingest_session_fs_path", {
   urIngestSessionFsPathId: text("ur_ingest_session_fs_path_id").primaryKey()
@@ -644,17 +453,6 @@ export const urIngestSessionFsPath = table("ur_ingest_session_fs_path", {
   checkJSON(table.elaboration),
 ]);
 
-export const urIngestSessionFsPathRelations = relations(
-  urIngestSessionFsPath,
-  ({ one, many }) => ({
-    urIngestSession: one(urIngestSession, {
-      fields: [urIngestSessionFsPath.ingestSessionId],
-      references: [urIngestSession.urIngestSessionId],
-    }),
-    uniformResources: many(uniformResource),
-    urIngestSessionFsPathEntries: many(urIngestSessionFsPathEntry),
-  }),
-);
 
 export const uniformResource = table("uniform_resource", {
   uniformResourceId: text("uniform_resource_id").primaryKey().notNull(),
@@ -669,6 +467,9 @@ export const uniformResource = table("uniform_resource", {
     "ingest_session_imap_acct_folder_message",
   ).references(() =>
     urIngestSessionImapAcctFolderMessage.urIngestSessionImapAcctFolderMessageId
+  ),
+  ingestIssueAcctProjectId: text("ingest_issue_acct_project_id").references(() =>
+    urIngestSessionPlmAcctProject.urIngestSessionPlmAcctProjectId
   ),
   uri: text().notNull(),
   contentDigest: text("content_digest").notNull(),
@@ -688,39 +489,6 @@ export const uniformResource = table("uniform_resource", {
   checkJSON(table.elaboration),
 ]);
 
-export const uniformResourceRelations = relations(
-  uniformResource,
-  ({ one, many }) => ({
-    urIngestSessionImapAcctFolderMessage: one(
-      urIngestSessionImapAcctFolderMessage,
-      {
-        fields: [uniformResource.ingestSessionImapAcctFolderMessage],
-        references: [
-          urIngestSessionImapAcctFolderMessage
-            .urIngestSessionImapAcctFolderMessageId,
-        ],
-      },
-    ),
-    urIngestSessionFsPath: one(urIngestSessionFsPath, {
-      fields: [uniformResource.ingestFsPathId],
-      references: [urIngestSessionFsPath.urIngestSessionFsPathId],
-    }),
-    urIngestSession: one(urIngestSession, {
-      fields: [uniformResource.ingestSessionId],
-      references: [urIngestSession.urIngestSessionId],
-    }),
-    device: one(device, {
-      fields: [uniformResource.deviceId],
-      references: [device.deviceId],
-    }),
-    uniformResourceTransforms: many(uniformResourceTransform),
-    urIngestSessionFsPathEntries: many(urIngestSessionFsPathEntry),
-    urIngestSessionTasks: many(urIngestSessionTask),
-    urIngestSessionAttachments: many(urIngestSessionAttachment),
-    urIngestSessionUdiPgpSqls: many(urIngestSessionUdiPgpSql),
-    uniformResourceEdges: many(uniformResourceEdge),
-  }),
-);
 
 export const uniformResourceTransform = table("uniform_resource_transform", {
   uniformResourceTransformId: text("uniform_resource_transform_id").primaryKey()
@@ -742,15 +510,6 @@ export const uniformResourceTransform = table("uniform_resource_transform", {
   checkJSON(table.elaboration),
 ]);
 
-export const uniformResourceTransformRelations = relations(
-  uniformResourceTransform,
-  ({ one }) => ({
-    uniformResource: one(uniformResource, {
-      fields: [uniformResourceTransform.uniformResourceId],
-      references: [uniformResource.uniformResourceId],
-    }),
-  }),
-);
 
 export const urIngestSessionFsPathEntry = table(
   "ur_ingest_session_fs_path_entry",
@@ -792,23 +551,6 @@ export const urIngestSessionFsPathEntry = table(
   ],
 );
 
-export const urIngestSessionFsPathEntryRelations = relations(
-  urIngestSessionFsPathEntry,
-  ({ one }) => ({
-    uniformResource: one(uniformResource, {
-      fields: [urIngestSessionFsPathEntry.uniformResourceId],
-      references: [uniformResource.uniformResourceId],
-    }),
-    urIngestSessionFsPath: one(urIngestSessionFsPath, {
-      fields: [urIngestSessionFsPathEntry.ingestFsPathId],
-      references: [urIngestSessionFsPath.urIngestSessionFsPathId],
-    }),
-    urIngestSession: one(urIngestSession, {
-      fields: [urIngestSessionFsPathEntry.ingestSessionId],
-      references: [urIngestSession.urIngestSessionId],
-    }),
-  }),
-);
 
 export const urIngestSessionTask = table("ur_ingest_session_task", {
   urIngestSessionTaskId: text("ur_ingest_session_task_id").primaryKey()
@@ -835,19 +577,6 @@ export const urIngestSessionTask = table("ur_ingest_session_task", {
   checkJSON(table.elaboration),
 ]);
 
-export const urIngestSessionTaskRelations = relations(
-  urIngestSessionTask,
-  ({ one }) => ({
-    uniformResource: one(uniformResource, {
-      fields: [urIngestSessionTask.uniformResourceId],
-      references: [uniformResource.uniformResourceId],
-    }),
-    urIngestSession: one(urIngestSession, {
-      fields: [urIngestSessionTask.ingestSessionId],
-      references: [urIngestSession.urIngestSessionId],
-    }),
-  }),
-);
 
 export const urIngestSessionImapAccount = table(
   "ur_ingest_session_imap_account",
@@ -872,16 +601,6 @@ export const urIngestSessionImapAccount = table(
   ],
 );
 
-export const urIngestSessionImapAccountRelations = relations(
-  urIngestSessionImapAccount,
-  ({ one, many }) => ({
-    urIngestSession: one(urIngestSession, {
-      fields: [urIngestSessionImapAccount.ingestSessionId],
-      references: [urIngestSession.urIngestSessionId],
-    }),
-    urIngestSessionImapAcctFolders: many(urIngestSessionImapAcctFolder),
-  }),
-);
 
 export const urIngestSessionImapAcctFolder = table(
   "ur_ingest_session_imap_acct_folder",
@@ -909,22 +628,6 @@ export const urIngestSessionImapAcctFolder = table(
   ],
 );
 
-export const urIngestSessionImapAcctFolderRelations = relations(
-  urIngestSessionImapAcctFolder,
-  ({ one, many }) => ({
-    urIngestSessionImapAccount: one(urIngestSessionImapAccount, {
-      fields: [urIngestSessionImapAcctFolder.ingestAccountId],
-      references: [urIngestSessionImapAccount.urIngestSessionImapAccountId],
-    }),
-    urIngestSession: one(urIngestSession, {
-      fields: [urIngestSessionImapAcctFolder.ingestSessionId],
-      references: [urIngestSession.urIngestSessionId],
-    }),
-    urIngestSessionImapAcctFolderMessages: many(
-      urIngestSessionImapAcctFolderMessage,
-    ),
-  }),
-);
 
 export const urIngestSessionImapAcctFolderMessage = table(
   "ur_ingest_session_imap_acct_folder_message",
@@ -960,22 +663,289 @@ export const urIngestSessionImapAcctFolderMessage = table(
   ],
 );
 
-export const urIngestSessionImapAcctFolderMessageRelations = relations(
-  urIngestSessionImapAcctFolderMessage,
-  ({ one, many }) => ({
-    uniformResources: many(uniformResource),
-    urIngestSessionImapAcctFolder: one(urIngestSessionImapAcctFolder, {
-      fields: [urIngestSessionImapAcctFolderMessage.ingestImapAcctFolderId],
-      references: [
-        urIngestSessionImapAcctFolder.urIngestSessionImapAcctFolderId,
-      ],
-    }),
-    urIngestSession: one(urIngestSession, {
-      fields: [urIngestSessionImapAcctFolderMessage.ingestSessionId],
-      references: [urIngestSession.urIngestSessionId],
-    }),
-  }),
+
+export const urIngestSessionPlmAccount = table(
+  "ur_ingest_session_plm_account",
+  {
+    urIngestSessionPlmAccountId: varchar("ur_ingest_session_plm_account_id")
+      .primaryKey().notNull(),
+    ingestSessionId: text("ingest_session_id").notNull().references(() =>
+      urIngestSession.urIngestSessionId
+    ),
+    provider: text().notNull(),
+    orgName: text("org_name").notNull(),
+    elaboration: text(),
+    ...housekeeping,
+  },
+  (table) => [
+    unique().on(table.provider, table.orgName),
+    checkJSON(table.elaboration),
+  ],
 );
+
+export const urIngestSessionPlmAcctProject = table(
+  "ur_ingest_session_plm_acct_project",
+  {
+    urIngestSessionPlmAcctProjectId: varchar(
+      "ur_ingest_session_plm_acct_project_id",
+    ).primaryKey().notNull(),
+    ingestSessionId: text("ingest_session_id").notNull().references(() =>
+      urIngestSession.urIngestSessionId
+    ),
+    ingestAccountId: text("ingest_account_id").notNull().references(() =>
+      urIngestSessionPlmAccount.urIngestSessionPlmAccountId
+    ),
+    parentProjectId: text("parent_project_id"),
+    name: text().notNull(),
+    description: text(),
+    id: text(),
+    key: text(),
+    elaboration: text(),
+    ...housekeeping,
+  },
+  (table) => [
+    unique().on(table.name, table.description),
+    checkJSON(table.elaboration),
+  ],
+);
+
+export const urIngestSessionPlmUser = table("ur_ingest_session_plm_user", {
+  urIngestSessionPlmUserId: varchar("ur_ingest_session_plm_user_id").primaryKey()
+    .notNull(),
+  userId: text("user_id").notNull(),
+  login: text().notNull(),
+  email: text(),
+  name: text(),
+  url: text().notNull(),
+  elaboration: text(),
+  ...housekeeping,
+}, (table) => [
+  unique().on(table.userId, table.login),
+  checkJSON(table.elaboration),
+]);
+
+export const urIngestSessionPlmIssueType = table(
+  "ur_ingest_session_plm_issue_type",
+  {
+    urIngestSessionPlmIssueTypeId: varchar("ur_ingest_session_plm_issue_type_id")
+      .primaryKey().notNull(),
+    avatarId: text("avatar_id"),
+    description: text().notNull(),
+    iconUrl: text("icon_url").notNull(),
+    id: text().notNull(),
+    name: text().notNull(),
+    subtask: integer().notNull(),
+    url: text().notNull(),
+    elaboration: text(),
+    ...housekeeping,
+  },
+  (table) => [
+    unique().on(table.id, table.name),
+    checkJSON(table.elaboration),
+  ],
+);
+
+export const urIngestSessionPlmAcctProjectIssue = table(
+  "ur_ingest_session_plm_acct_project_issue",
+  {
+    urIngestSessionPlmAcctProjectIssueId: varchar(
+      "ur_ingest_session_plm_acct_project_issue_id",
+    ).primaryKey().notNull(),
+    ingestSessionId: text("ingest_session_id").notNull().references(() =>
+      urIngestSession.urIngestSessionId
+    ),
+    urIngestSessionPlmAcctProjectId: text(
+      "ur_ingest_session_plm_acct_project_id",
+    ).notNull().references(() =>
+      urIngestSessionPlmAcctProject.urIngestSessionPlmAcctProjectId
+    ),
+    uniformResourceId: text("uniform_resource_id").references(() =>
+      uniformResource.uniformResourceId
+    ),
+    issueId: text("issue_id").notNull(),
+    issueNumber: integer("issue_number"),
+    parentIssueId: text("parent_issue_id"),
+    title: text().notNull(),
+    body: text(),
+    bodyText: text("body_text"),
+    bodyHtml: text("body_html"),
+    state: text().notNull(),
+    assignedTo: text("assigned_to"),
+    user: text().notNull().references(() =>
+      urIngestSessionPlmUser.urIngestSessionPlmUserId
+    ),
+    url: text().notNull(),
+    closedAt: text("closed_at"),
+    issueTypeId: text("issue_type_id").references(() =>
+      urIngestSessionPlmIssueType.urIngestSessionPlmIssueTypeId
+    ),
+    timeEstimate: integer("time_estimate"),
+    aggregateTimeEstimate: integer("aggregate_time_estimate"),
+    timeOriginalEstimate: integer("time_original_estimate"),
+    timeSpent: integer("time_spent"),
+    aggregateTimeSpent: integer("aggregate_time_spent"),
+    aggregateTimeOriginalEstimate: integer("aggregate_time_original_estimate"),
+    workratio: integer(),
+    currentProgress: integer("current_progress"),
+    totalProgress: integer("total_progress"),
+    resolutionName: text("resolution_name"),
+    resolutionDate: text("resolution_date"),
+    elaboration: text(),
+    ...housekeeping,
+  },
+  (table) => [
+    unique().on(table.title, table.issueId, table.state, table.assignedTo),
+    checkJSON(table.elaboration),
+  ],
+);
+
+export const urIngestSessionPlmAcctLabel = table(
+  "ur_ingest_session_plm_acct_label",
+  {
+    urIngestSessionPlmAcctLabelId: varchar("ur_ingest_session_plm_acct_label_id")
+      .primaryKey().notNull(),
+    urIngestSessionPlmAcctProjectId: text(
+      "ur_ingest_session_plm_acct_project_id",
+    ).notNull().references(() =>
+      urIngestSessionPlmAcctProject.urIngestSessionPlmAcctProjectId
+    ),
+    urIngestSessionPlmAcctProjectIssueId: text(
+      "ur_ingest_session_plm_acct_project_issue_id",
+    ).notNull().references(() =>
+      urIngestSessionPlmAcctProjectIssue.urIngestSessionPlmAcctProjectIssueId
+    ),
+    label: text().notNull(),
+    elaboration: text(),
+    ...housekeeping,
+  },
+  (table) => [
+    checkJSON(table.elaboration),
+  ],
+);
+
+export const urIngestSessionPlmMilestone = table(
+  "ur_ingest_session_plm_milestone",
+  {
+    urIngestSessionPlmMilestoneId: varchar("ur_ingest_session_plm_milestone_id")
+      .primaryKey().notNull(),
+    urIngestSessionPlmAcctProjectId: text(
+      "ur_ingest_session_plm_acct_project_id",
+    ).notNull().references(() =>
+      urIngestSessionPlmAcctProject.urIngestSessionPlmAcctProjectId
+    ),
+    title: text().notNull(),
+    milestoneId: text("milestone_id").notNull(),
+    url: text().notNull(),
+    htmlUrl: text("html_url").notNull(),
+    openIssues: integer("open_issues"),
+    closedIssues: integer("closed_issues"),
+    dueOn: timestamptz("due_on"),
+    closedAt: timestamptz("closed_at"),
+    elaboration: text(),
+    ...housekeeping,
+  },
+  (table) => [
+    checkJSON(table.elaboration),
+  ],
+);
+
+export const urIngestSessionPlmAcctRelationship = table(
+  "ur_ingest_session_plm_acct_relationship",
+  {
+    urIngestSessionPlmAcctRelationshipId: varchar(
+      "ur_ingest_session_plm_acct_relationship_id",
+    ).primaryKey().notNull(),
+    urIngestSessionPlmAcctProjectIdPrime: text(
+      "ur_ingest_session_plm_acct_project_id_prime",
+    ).notNull().references(() =>
+      urIngestSessionPlmAcctProject.urIngestSessionPlmAcctProjectId
+    ),
+    urIngestSessionPlmAcctProjectIdRelated: text(
+      "ur_ingest_session_plm_acct_project_id_related",
+    ).notNull(),
+    urIngestSessionPlmAcctProjectIssueIdPrime: text(
+      "ur_ingest_session_plm_acct_project_issue_id_prime",
+    ).notNull().references(() =>
+      urIngestSessionPlmAcctProjectIssue.urIngestSessionPlmAcctProjectIssueId
+    ),
+    urIngestSessionPlmAcctProjectIssueIdRelated: text(
+      "ur_ingest_session_plm_acct_project_issue_id_related",
+    ).notNull(),
+    relationship: text(),
+    elaboration: text(),
+    ...housekeeping,
+  },
+  (table) => [
+    checkJSON(table.elaboration),
+  ],
+);
+
+export const urIngestSessionPlmComment = table(
+  "ur_ingest_session_plm_comment",
+  {
+    urIngestSessionPlmCommentId: varchar("ur_ingest_session_plm_comment_id")
+      .primaryKey().notNull(),
+    urIngestSessionPlmAcctProjectIssueId: text(
+      "ur_ingest_session_plm_acct_project_issue_id",
+    ).notNull().references(() =>
+      urIngestSessionPlmAcctProjectIssue.urIngestSessionPlmAcctProjectIssueId
+    ),
+    commentId: text("comment_id").notNull(),
+    nodeId: text("node_id").notNull(),
+    url: text().notNull(),
+    body: text(),
+    bodyText: text("body_text"),
+    bodyHtml: text("body_html"),
+    user: text().notNull().references(() =>
+      urIngestSessionPlmUser.urIngestSessionPlmUserId
+    ),
+    elaboration: text(),
+    ...housekeeping,
+  },
+  (table) => [
+    unique().on(table.commentId, table.url, table.body),
+    checkJSON(table.elaboration),
+  ],
+);
+
+export const urIngestSessionPlmReaction = table(
+  "ur_ingest_session_plm_reaction",
+  {
+    urIngestSessionPlmReactionId: varchar("ur_ingest_session_plm_reaction_id")
+      .primaryKey().notNull(),
+    reactionId: text("reaction_id").notNull(),
+    reactionType: text("reaction_type").notNull(),
+    elaboration: text(),
+    ...housekeeping,
+  },
+  (table) => [
+    unique().on(table.reactionType),
+    checkJSON(table.elaboration),
+  ],
+);
+
+export const urIngestSessionPlmIssueReaction = table(
+  "ur_ingest_session_plm_issue_reaction",
+  {
+    urIngestSessionPlmIssueReactionId: varchar(
+      "ur_ingest_session_plm_issue_reaction_id",
+    ).primaryKey().notNull(),
+    urIngestPlmReactionId: text("ur_ingest_plm_reaction_id").notNull()
+      .references(() => urIngestSessionPlmReaction.urIngestSessionPlmReactionId),
+    urIngestPlmIssueId: text("ur_ingest_plm_issue_id").notNull().references(() =>
+      urIngestSessionPlmAcctProjectIssue.urIngestSessionPlmAcctProjectIssueId
+    ),
+    count: integer().default(1),
+    elaboration: text(),
+    ...housekeeping,
+  },
+  (table) => [
+    unique().on(table.urIngestPlmIssueId, table.urIngestPlmReactionId),
+    checkJSON(table.elaboration),
+  ],
+);
+
+
 
 export const urIngestSessionAttachment = table("ur_ingest_session_attachment", {
   urIngestSessionAttachmentId: text("ur_ingest_session_attachment_id")
@@ -999,15 +969,6 @@ export const urIngestSessionAttachment = table("ur_ingest_session_attachment", {
   unique().on(table.uniformResourceId, table.checksum, table.nature, table.size),
 ]);
 
-export const urIngestSessionAttachmentRelations = relations(
-  urIngestSessionAttachment,
-  ({ one }) => ({
-    uniformResource: one(uniformResource, {
-      fields: [urIngestSessionAttachment.uniformResourceId],
-      references: [uniformResource.uniformResourceId],
-    }),
-  }),
-);
 
 export const urIngestSessionUdiPgpSql = table("ur_ingest_session_udi_pgp_sql", {
   urIngestSessionUdiPgpSqlId: text("ur_ingest_session_udi_pgp_sql_id")
@@ -1032,19 +993,6 @@ export const urIngestSessionUdiPgpSql = table("ur_ingest_session_udi_pgp_sql", {
   checkJSON(table.behaviour),
 ]);
 
-export const urIngestSessionUdiPgpSqlRelations = relations(
-  urIngestSessionUdiPgpSql,
-  ({ one }) => ({
-    urIngestSession: one(urIngestSession, {
-      fields: [urIngestSessionUdiPgpSql.ingestSessionId],
-      references: [urIngestSession.urIngestSessionId],
-    }),
-    uniformResource: one(uniformResource, {
-      fields: [urIngestSessionUdiPgpSql.uniformResourceId],
-      references: [uniformResource.uniformResourceId],
-    }),
-  }),
-);
 
 export const orchestrationNature = table("orchestration_nature", {
   orchestrationNatureId: text("orchestration_nature_id").primaryKey().notNull(),
@@ -1059,12 +1007,6 @@ export const orchestrationNature = table("orchestration_nature", {
   unique().on(table.orchestrationNatureId, table.nature),
 ]);
 
-export const orchestrationNatureRelations = relations(
-  orchestrationNature,
-  ({ many }) => ({
-    orchestrationSessions: many(orchestrationSession),
-  }),
-);
 
 export const orchestrationSession = table("orchestration_session", {
   orchestrationSessionId: text("orchestration_session_id").primaryKey()
@@ -1086,23 +1028,6 @@ export const orchestrationSession = table("orchestration_session", {
   checkJSON(table.diagnosticsJson),
 ]);
 
-export const orchestrationSessionRelations = relations(
-  orchestrationSession,
-  ({ one, many }) => ({
-    orchestrationNature: one(orchestrationNature, {
-      fields: [orchestrationSession.orchestrationNatureId],
-      references: [orchestrationNature.orchestrationNatureId],
-    }),
-    device: one(device, {
-      fields: [orchestrationSession.deviceId],
-      references: [device.deviceId],
-    }),
-    orchestrationSessionEntries: many(orchestrationSessionEntry),
-    orchestrationSessionStates: many(orchestrationSessionState),
-    orchestrationSessionExecs: many(orchestrationSessionExec),
-    orchestrationSessionIssues: many(orchestrationSessionIssue),
-  }),
-);
 
 export const orchestrationSessionEntry = table("orchestration_session_entry", {
   orchestrationSessionEntryId: text("orchestration_session_entry_id")
@@ -1115,18 +1040,6 @@ export const orchestrationSessionEntry = table("orchestration_session_entry", {
   elaboration: text(),
 }, (table) => []);
 
-export const orchestrationSessionEntryRelations = relations(
-  orchestrationSessionEntry,
-  ({ one, many }) => ({
-    orchestrationSession: one(orchestrationSession, {
-      fields: [orchestrationSessionEntry.sessionId],
-      references: [orchestrationSession.orchestrationSessionId],
-    }),
-    orchestrationSessionStates: many(orchestrationSessionState),
-    orchestrationSessionExecs: many(orchestrationSessionExec),
-    orchestrationSessionIssues: many(orchestrationSessionIssue),
-  }),
-);
 
 export const orchestrationSessionState = table("orchestration_session_state", {
   orchestrationSessionStateId: text("orchestration_session_state_id")
@@ -1147,19 +1060,6 @@ export const orchestrationSessionState = table("orchestration_session_state", {
   unique().on(table.orchestrationSessionStateId, table.fromState, table.toState),
 ]);
 
-export const orchestrationSessionStateRelations = relations(
-  orchestrationSessionState,
-  ({ one }) => ({
-    orchestrationSessionEntry: one(orchestrationSessionEntry, {
-      fields: [orchestrationSessionState.sessionEntryId],
-      references: [orchestrationSessionEntry.orchestrationSessionEntryId],
-    }),
-    orchestrationSession: one(orchestrationSession, {
-      fields: [orchestrationSessionState.sessionId],
-      references: [orchestrationSession.orchestrationSessionId],
-    }),
-  }),
-);
 
 export const orchestrationSessionExec = table("orchestration_session_exec", {
   orchestrationSessionExecId: text("orchestration_session_exec_id").primaryKey()
@@ -1209,20 +1109,6 @@ export const orchestrationSessionIssue = table("orchestration_session_issue", {
   elaboration: text(),
 }, (table) => []);
 
-export const orchestrationSessionIssueRelations = relations(
-  orchestrationSessionIssue,
-  ({ one, many }) => ({
-    orchestrationSessionEntry: one(orchestrationSessionEntry, {
-      fields: [orchestrationSessionIssue.sessionEntryId],
-      references: [orchestrationSessionEntry.orchestrationSessionEntryId],
-    }),
-    orchestrationSession: one(orchestrationSession, {
-      fields: [orchestrationSessionIssue.sessionId],
-      references: [orchestrationSession.orchestrationSessionId],
-    }),
-    orchestrationSessionIssueRelations: many(orchestrationSessionIssueRelation),
-  }),
-);
 
 export const orchestrationSessionIssueRelation = table(
   "orchestration_session_issue_relation",
@@ -1240,15 +1126,6 @@ export const orchestrationSessionIssueRelation = table(
   (table) => [],
 );
 
-export const orchestrationSessionIssueRelationRelations = relations(
-  orchestrationSessionIssueRelation,
-  ({ one }) => ({
-    orchestrationSessionIssue: one(orchestrationSessionIssue, {
-      fields: [orchestrationSessionIssueRelation.issueIdPrime],
-      references: [orchestrationSessionIssue.orchestrationSessionIssueId],
-    }),
-  }),
-);
 
 export const orchestrationSessionLog = table("orchestration_session_log", {
   orchestrationSessionLogId: numeric("orchestration_session_log_id")
@@ -1272,12 +1149,6 @@ export const uniformResourceGraph = table("uniform_resource_graph", {
   elaboration: text(),
 }, (table) => []);
 
-export const uniformResourceGraphRelations = relations(
-  uniformResourceGraph,
-  ({ many }) => ({
-    uniformResourceEdges: many(uniformResourceEdge),
-  }),
-);
 
 export const uniformResourceEdge = table("uniform_resource_edge", {
   graphName: text("graph_name").notNull().references(() =>
@@ -1296,19 +1167,6 @@ export const uniformResourceEdge = table("uniform_resource_edge", {
   unique().on(table.graphName, table.nature, table.nodeId, table.uniformResourceId),
 ]);
 
-export const uniformResourceEdgeRelations = relations(
-  uniformResourceEdge,
-  ({ one }) => ({
-    uniformResource: one(uniformResource, {
-      fields: [uniformResourceEdge.uniformResourceId],
-      references: [uniformResource.uniformResourceId],
-    }),
-    uniformResourceGraph: one(uniformResourceGraph, {
-      fields: [uniformResourceEdge.graphName],
-      references: [uniformResourceGraph.name],
-    }),
-  }),
-);
 
 export const surveilrOsqueryMsNode = table("surveilr_osquery_ms_node", {
   surveilrOsqueryMsNodeId: text("surveilr_osquery_ms_node_id").primaryKey()
@@ -1332,27 +1190,6 @@ export const surveilrOsqueryMsNode = table("surveilr_osquery_ms_node", {
   unique().on(table.nodeKey),
 ]);
 
-export const surveilrOsqueryMsNodeRelations = relations(
-  surveilrOsqueryMsNode,
-  ({ one, many }) => ({
-    behavior: one(behavior, {
-      fields: [surveilrOsqueryMsNode.behaviorId],
-      references: [behavior.behaviorId],
-    }),
-    device: one(device, {
-      fields: [surveilrOsqueryMsNode.deviceId],
-      references: [device.deviceId],
-    }),
-    urIngestSessionOsqueryMsLogs: many(urIngestSessionOsqueryMsLog),
-    surveilrOsqueryMsDistributedQueries: many(
-      surveilrOsqueryMsDistributedQuery,
-    ),
-    surveilrOsqueryMsDistributedResults: many(
-      surveilrOsqueryMsDistributedResult,
-    ),
-    surveilrOsqueryMsCarves: many(surveilrOsqueryMsCarve),
-  }),
-);
 
 export const urIngestSessionOsqueryMsLog = table(
   "ur_ingest_session_osquery_ms_log",
@@ -1372,15 +1209,6 @@ export const urIngestSessionOsqueryMsLog = table(
   ],
 );
 
-export const urIngestSessionOsqueryMsLogRelations = relations(
-  urIngestSessionOsqueryMsLog,
-  ({ one }) => ({
-    surveilrOsqueryMsNode: one(surveilrOsqueryMsNode, {
-      fields: [urIngestSessionOsqueryMsLog.nodeKey],
-      references: [surveilrOsqueryMsNode.nodeKey],
-    }),
-  }),
-);
 
 export const osqueryPolicy = table("osquery_policy", {
   osqueryPolicyId: text("osquery_policy_id").primaryKey().notNull(),
@@ -1416,18 +1244,6 @@ export const surveilrOsqueryMsDistributedQuery = table(
   (table) => [],
 );
 
-export const surveilrOsqueryMsDistributedQueryRelations = relations(
-  surveilrOsqueryMsDistributedQuery,
-  ({ one, many }) => ({
-    surveilrOsqueryMsNode: one(surveilrOsqueryMsNode, {
-      fields: [surveilrOsqueryMsDistributedQuery.nodeKey],
-      references: [surveilrOsqueryMsNode.nodeKey],
-    }),
-    surveilrOsqueryMsDistributedResults: many(
-      surveilrOsqueryMsDistributedResult,
-    ),
-  }),
-);
 
 export const surveilrOsqueryMsDistributedResult = table(
   "surveilr_osquery_ms_distributed_result",
@@ -1448,19 +1264,6 @@ export const surveilrOsqueryMsDistributedResult = table(
   (table) => [],
 );
 
-export const surveilrOsqueryMsDistributedResultRelations = relations(
-  surveilrOsqueryMsDistributedResult,
-  ({ one }) => ({
-    surveilrOsqueryMsNode: one(surveilrOsqueryMsNode, {
-      fields: [surveilrOsqueryMsDistributedResult.nodeKey],
-      references: [surveilrOsqueryMsNode.nodeKey],
-    }),
-    surveilrOsqueryMsDistributedQuery: one(surveilrOsqueryMsDistributedQuery, {
-      fields: [surveilrOsqueryMsDistributedResult.queryId],
-      references: [surveilrOsqueryMsDistributedQuery.queryId],
-    }),
-  }),
-);
 
 export const surveilrOsqueryMsCarve = table("surveilr_osquery_ms_carve", {
   surveilrOsqueryMsCarveId: text("surveilr_osquery_ms_carve_id").primaryKey()
@@ -1485,18 +1288,6 @@ export const surveilrOsqueryMsCarve = table("surveilr_osquery_ms_carve", {
   unique().on(table.carveGuid),
 ]);
 
-export const surveilrOsqueryMsCarveRelations = relations(
-  surveilrOsqueryMsCarve,
-  ({ one, many }) => ({
-    surveilrOsqueryMsNode: one(surveilrOsqueryMsNode, {
-      fields: [surveilrOsqueryMsCarve.nodeKey],
-      references: [surveilrOsqueryMsNode.nodeKey],
-    }),
-    surveilrOsqueryMsCarvedExtractedFiles: many(
-      surveilrOsqueryMsCarvedExtractedFile,
-    ),
-  }),
-);
 
 export const surveilrOsqueryMsCarvedExtractedFile = table(
   "surveilr_osquery_ms_carved_extracted_file",
@@ -1522,15 +1313,6 @@ export const surveilrOsqueryMsCarvedExtractedFile = table(
   ],
 );
 
-export const surveilrOsqueryMsCarvedExtractedFileRelations = relations(
-  surveilrOsqueryMsCarvedExtractedFile,
-  ({ one }) => ({
-    surveilrOsqueryMsCarve: one(surveilrOsqueryMsCarve, {
-      fields: [surveilrOsqueryMsCarvedExtractedFile.carveGuid],
-      references: [surveilrOsqueryMsCarve.carveGuid],
-    }),
-  }),
-);
 
 export const surveilrSnmpDevice = table("surveilr_snmp_device", {
   surveilrSnmpDeviceId: text("surveilr_snmp_device_id").primaryKey().notNull(),
@@ -1556,20 +1338,6 @@ export const surveilrSnmpDevice = table("surveilr_snmp_device", {
   checkJSON(table.elaboration),
 ]);
 
-export const surveilrSnmpDeviceRelations = relations(
-  surveilrSnmpDevice,
-  ({ one, many }) => ({
-    device: one(device, {
-      fields: [surveilrSnmpDevice.deviceId],
-      references: [device.deviceId],
-    }),
-    behavior: one(behavior, {
-      fields: [surveilrSnmpDevice.behaviorId],
-      references: [behavior.behaviorId],
-    }),
-    surveilrSnmpCollections: many(surveilrSnmpCollection),
-  }),
-);
 
 export const surveilrSnmpCollection = table("surveilr_snmp_collection", {
   surveilrSnmpCollectionId: text("surveilr_snmp_collection_id").primaryKey().notNull(),
@@ -1591,15 +1359,6 @@ export const surveilrSnmpCollection = table("surveilr_snmp_collection", {
   checkJSON(table.elaboration),
 ]);
 
-export const surveilrSnmpCollectionRelations = relations(
-  surveilrSnmpCollection,
-  ({ one }) => ({
-    surveilrSnmpDevice: one(surveilrSnmpDevice, {
-      fields: [surveilrSnmpCollection.deviceKey],
-      references: [surveilrSnmpDevice.deviceKey],
-    }),
-  }),
-);
 
 export const surveilrFunctionDoc = table("surveilr_function_doc", {
   name: text().primaryKey(),

@@ -1,6 +1,6 @@
 {
     "name": "@surveilr/bootstrap-sql",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "RSSD Drizzle Schema",
     "type": "module",
     "main": "./dist/index.cjs",
@@ -36,10 +36,22 @@
         "drizzle",
         "orm",
         "rssd",
-        "sqlite"
+        "sqlite",
+        "surveilr",
+        "observability",
+        "compliance"
     ],
-    "author": "",
+    "author": "surveilr",
     "license": "ISC",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/surveilr/std.git",
+        "directory": "packages/drizzle"
+    },
+    "bugs": {
+        "url": "https://github.com/surveilr/std/issues"
+    },
+    "homepage": "https://github.com/surveilr/std#readme",
     "devDependencies": {
         "drizzle-orm": "^0.45.1",
         "tsup": "^8.2.4",
