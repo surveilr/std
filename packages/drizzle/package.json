@@ -1,6 +1,6 @@
 {
-    "name": "@surveilr/bootstrap-sql",
-    "version": "0.0.4",
+    "name": "@surveilr/ontology",
+    "version": "0.0.2",
     "description": "RSSD Drizzle Schema",
     "type": "module",
     "main": "./dist/index.cjs",

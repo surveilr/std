@@ -1,11 +1,11 @@
-# @surveilr/bootstrap-sql
+# @surveilr/ontology
 
 Drizzle ORM schema for the RSSD (Resource Surveillance State Database) system.
 
 ## Installation
 
 ```bash
-npm install @surveilr/bootstrap-sql better-sqlite3 drizzle-orm
+npm install @surveilr/ontology better-sqlite3 drizzle-orm
 ```
 
 ## Initialization
@@ -23,7 +23,7 @@ surveilr ingest files -d rssd.db
 ```typescript
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import Database from "better-sqlite3";
-import * as schema from "@surveilr/bootstrap-sql";
+import * as schema from "@surveilr/ontology";
 
 const sqlite = new Database("rssd.db");
 const db = drizzle(sqlite, { schema });
