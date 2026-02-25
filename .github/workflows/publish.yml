@@ -19,6 +19,10 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
       
+      - name: Set package version
+        working-directory: packages/drizzle
+        run: npm version ${{ github.ref_name }} --no-git-tag-version
+      
       - name: Install dependencies
         working-directory: packages/drizzle
         run: npm ci
