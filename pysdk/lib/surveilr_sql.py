@@ -155,7 +155,6 @@ uniform_resource = Table(
     Column("ingest_session_id", String, ForeignKey("ur_ingest_session.ur_ingest_session_id"), nullable=False),
     Column("ingest_fs_path_id", String, ForeignKey("ur_ingest_session_fs_path.ur_ingest_session_fs_path_id")),
     Column("ingest_session_imap_acct_folder_message", String),
-    Column("ingest_issue_acct_project_id", String),
     Column("uri", Text, nullable=False),
     Column("content_digest", Text, nullable=False),
     Column("content", LargeBinary),

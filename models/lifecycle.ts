@@ -1167,8 +1167,6 @@ export function serviceModels<EmitContext extends SQLa.SqlEmitContext>() {
     ingest_session_imap_acct_folder_message:
       urIngestSessionImapAcctFolderMessage
         .references.ur_ingest_session_imap_acct_folder_message_id().optional(),
-    ingest_issue_acct_project_id: urIngestSessionPlmAccountProject
-      .references.ur_ingest_session_plm_acct_project_id().optional(),
     uri: gd.text(),
     content_digest: gd.text(),
     content: gd.blobTextNullable(),

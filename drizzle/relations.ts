@@ -195,10 +195,6 @@ export const urIngestSessionFsPathRelations = relations(urIngestSessionFsPath, (
 }));
 
 export const uniformResourceRelations = relations(uniformResource, ({one, many}) => ({
-	urIngestSessionPlmAcctProject: one(urIngestSessionPlmAcctProject, {
-		fields: [uniformResource.ingestIssueAcctProjectId],
-		references: [urIngestSessionPlmAcctProject.urIngestSessionPlmAcctProjectId]
-	}),
 	urIngestSessionImapAcctFolderMessage: one(urIngestSessionImapAcctFolderMessage, {
 		fields: [uniformResource.ingestSessionImapAcctFolderMessage],
 		references: [urIngestSessionImapAcctFolderMessage.urIngestSessionImapAcctFolderMessageId]

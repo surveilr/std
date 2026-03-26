@@ -468,9 +468,6 @@ export const uniformResource = table("uniform_resource", {
   ).references(() =>
     urIngestSessionImapAcctFolderMessage.urIngestSessionImapAcctFolderMessageId
   ),
-  ingestIssueAcctProjectId: text("ingest_issue_acct_project_id").references(() =>
-    urIngestSessionPlmAcctProject.urIngestSessionPlmAcctProjectId
-  ),
   uri: text().notNull(),
   contentDigest: text("content_digest").notNull(),
   content: blob(),
