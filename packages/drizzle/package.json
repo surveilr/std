@@ -1,6 +1,6 @@
 {
     "name": "@surveilr/ontology",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "RSSD Drizzle Schema",
     "type": "module",
     "main": "./dist/index.cjs",
